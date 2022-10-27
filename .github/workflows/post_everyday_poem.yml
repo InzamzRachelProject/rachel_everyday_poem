@@ -38,7 +38,7 @@ jobs:
           export TG_CHANNEL=${{secrets.TG_CHANNEL}}
           export TG_GROUP=${{secrets.TG_GROUP}}
           export TGBOT_TOKEN=${{secrets.TGBOT_TOKEN}}
-          python main.py
+          python src/main.py
 
       - name: Run safe dir
         run: |
