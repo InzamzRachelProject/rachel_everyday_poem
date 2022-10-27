@@ -190,7 +190,7 @@ def main():
     # poem_html = f.read()
 
     res_dict, res_str = parse_poem_html(poem_html, famous_sentence)
-    f = open(f"../poem/{res_dict['title']}.json", "w")
+    f = open(f"poem/{res_dict['title']}.json", "w")
     f.write(res_str)
     f.close()
 
