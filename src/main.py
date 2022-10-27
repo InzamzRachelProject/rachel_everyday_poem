@@ -134,6 +134,10 @@ def main():
     global CHROME_DRIVER_PATH
     home_html = requests.request("GET", url="https://www.gushiwen.cn/").text
 
+    # 使用示例HTML
+    # f = open("../sample/home_html.html", "r")
+    # home_html = f.read()
+
     CHROME_DRIVER_PATH = os.getenv("CHROME_DRIVER_PATH")
     soup = bs4.BeautifulSoup(home_html, 'html.parser')
     famous_sentence = soup.find('div', class_="jucount")
@@ -156,8 +160,6 @@ def main():
     client.quit()
 
     # 使用示例HTML
-    # f = open("../sample/home_html.html", "r")
-    # home_html = f.read()
     # f = open("../sample/poem_html.html", "r")
     # poem_html = f.read()
 
