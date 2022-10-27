@@ -155,7 +155,8 @@ def main():
     client.get(poem_html_link)
     btn = client.find_elements(selenium.webdriver.common.by.By.LINK_TEXT, "展开阅读全文 ∨")
     for x in btn:
-        x.click()
+        # 直接使用click函数会导致弹出登录框，下一次点击失效，于是直接运行超链接
+        client.execute_script(x.get_attribute('href'))
     poem_html = client.page_source
     client.quit()
 
