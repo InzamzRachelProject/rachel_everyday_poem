@@ -7,6 +7,8 @@ import selenium.webdriver.common.by
 from bs4.element import Tag, NavigableString
 from selenium import webdriver
 
+from src.telegram_bot import tgbot_sent_channel
+
 CHROME_DRIVER_PATH = ""
 
 
@@ -16,13 +18,13 @@ def parse_poem_html(poem_html: str, famous_sentence: str) -> (dict, str):
     # print("poem_title: ", poem_title)
     poem_author = soup.find('p', class_='source').text
     # print('poem_author: ', poem_author)
-    poem_context_pre = soup.find('div', class_='contson')
-    poem_context = ""
-    for each in poem_context_pre.contents:
+    poem_content_pre = soup.find('div', class_='contson')
+    poem_content = ""
+    for each in poem_content_pre.contents:
         if isinstance(each, bs4.element.Tag) and each.name == 'br':
-            poem_context += '\n'
+            poem_content += '\n'
         else:
-            poem_context += each.text.strip()
+            poem_content += each.text.strip()
     # print('poem_context: ', poem_context)
     poem_translate_id_list = []
     poem_shangxi_id_list = []
@@ -51,7 +53,7 @@ def parse_poem_html(poem_html: str, famous_sentence: str) -> (dict, str):
         if each.replace('i', 'iquan') in poem_shangxi_id_list:
             poem_shangxi_id_list.remove(each)
     poem_translate_list = []
-    poem_reference_string = ""
+    poem_reference_string = "参考资料\n"
     poem_translate_string = ""
     for each in poem_translate_id_list:
         poem_translate_div = main3_div.find('div', id=each)
@@ -92,7 +94,7 @@ def parse_poem_html(poem_html: str, famous_sentence: str) -> (dict, str):
                 poem_appreciation_string += ''.join(context.text.split()).strip() + '\n'
         poem_appreciation_list.append(poem_appreciation_string)
     # 作品背景的提取
-    poem_background_info = ''
+    poem_background_info = '创作背景\n'
     poem_background_info_div = main3_div.find('h2')
     while poem_background_info_div.text.find('创作背景') == -1:
         poem_background_info_div = poem_background_info_div.find_next('h2')
@@ -104,7 +106,7 @@ def parse_poem_html(poem_html: str, famous_sentence: str) -> (dict, str):
             poem_background_info += ''.join(each.text.split()).strip() + '\n'
 
     # 作者生平简介的提取
-    poem_author_info = ''
+    poem_author_info = '作者简介\n'
     poem_author_info_div = main3_div.find('div', class_='sonspic')
     for each in poem_author_info_div.find('div', class_='cont').contents:
         if isinstance(each, Tag) and each.name == 'p':
@@ -116,7 +118,7 @@ def parse_poem_html(poem_html: str, famous_sentence: str) -> (dict, str):
         'title': poem_title,
         'author': {'name': poem_author, 'brief_info': poem_author_info},
         'background': poem_background_info,
-        'content': poem_context,
+        'content': poem_content,
         'translate': poem_translate_list[0],
         'reference': poem_reference_string,
         'keyword': poem_translate_list[1],
@@ -139,6 +141,7 @@ def main():
     # home_html = f.read()
 
     CHROME_DRIVER_PATH = os.getenv("CHROME_DRIVER_PATH")
+
     soup = bs4.BeautifulSoup(home_html, 'html.parser')
     famous_sentence = soup.find('div', class_="jucount")
     poem_title_div = soup.find('div', class_="sourceimg")
@@ -164,10 +167,12 @@ def main():
     # f = open("../sample/poem_html.html", "r")
     # poem_html = f.read()
 
-    res_dict, res_str = parse_poem_html(poem_html, famous_sentence.text)
+    res_dict, res_str = parse_poem_html(poem_html, famous_sentence.text.strip())
     f = open(f"../poem/{res_dict['title']}.json", "w")
     f.write(res_str)
     f.close()
+
+    tgbot_sent_channel(res_dict, res_str)
 
 
 if __name__ == '__main__':
