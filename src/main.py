@@ -11,7 +11,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.utils import ChromeType
 
-from src.telegram_bot import tgbot_sent_channel
+from telegram_bot import tgbot_sent_channel
 
 CHROME_DRIVER_PATH = ""
 
