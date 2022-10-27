@@ -129,11 +129,11 @@ def parse_poem_html(poem_html: str, famous_sentence: str) -> (dict, str):
     print(result_str)
     return result_dict, result_str
 
+
 def main():
     global CHROME_DRIVER_PATH
     home_html = requests.request("GET", url="https://www.gushiwen.cn/").text
-    # f = open("../sample/home_html.html", "r")
-    # home_html = f.read()
+
     CHROME_DRIVER_PATH = os.getenv("CHROME_DRIVER_PATH")
     soup = bs4.BeautifulSoup(home_html, 'html.parser')
     famous_sentence = soup.find('div', class_="jucount")
@@ -145,19 +145,27 @@ def main():
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument('--no-sandbox')  # 这个配置很重要
 
-    client = webdriver.Chrome(options=chrome_options, executable_path=CHROME_DRIVER_PATH)
+    client = webdriver.Chrome(
+        options=chrome_options, executable_path=CHROME_DRIVER_PATH
+    )
     client.get(poem_html_link)
     btn = client.find_elements(selenium.webdriver.common.by.By.LINK_TEXT, "展开阅读全文 ∨")
     for x in btn:
         x.click()
     poem_html = client.page_source
     client.quit()
+
+    # 使用示例HTML
+    # f = open("../sample/home_html.html", "r")
+    # home_html = f.read()
     # f = open("../sample/poem_html.html", "r")
     # poem_html = f.read()
+
     res_dict, res_str = parse_poem_html(poem_html, famous_sentence.text)
     f = open(f"../sample/{res_dict['title']}.json", "w")
     f.write(res_str)
     f.close()
+
 
 if __name__ == '__main__':
     main()
