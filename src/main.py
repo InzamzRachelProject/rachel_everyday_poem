@@ -74,7 +74,12 @@ def parse_poem_html(poem_html: str, famous_sentence: str) -> (dict, str):
                         continue
                     if subcontext.name == 'br':
                         poem_translate_string += '\n'
-                if isinstance(subcontext, NavigableString):
+                elif isinstance(subcontext, NavigableString) and subcontext.text.strip().find('注释') != -1:
+                    if poem_translate_string != '':
+                        poem_translate_list.append(poem_translate_string)
+                    poem_translate_string = subcontext.text.strip() + '\n'
+                    continue
+                elif isinstance(subcontext, NavigableString):
                     poem_translate_string += subcontext.strip()
         if poem_translate_string != '':
             poem_translate_list.append(poem_translate_string)
