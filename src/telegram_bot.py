@@ -42,9 +42,10 @@ def tgbot_sent_channel(poem_dict: dict, poem_str: str):
     poem_main_content = poem_main_content.replace(
         poem_dict['title'], '<b>' + poem_dict['title'] + '</b>'
     )
-    poem_main_content = poem_main_content.replace(
-        poem_dict['famous'], '<b>' + poem_dict['famous'] + '</b>'
-    )
+    if poem_dict['famous'] != '':
+        poem_main_content = poem_main_content.replace(
+            poem_dict['famous'], '<b>' + poem_dict['famous'] + '</b>'
+        )
 
     url = f"https://api.telegram.org/bot{TGBOT_TOKEN}/sendMessage?chat_id={TG_CHANNEL}&text={poem_main_content}&parse_mode=HTML"
     responce = requests.request("Get", url)

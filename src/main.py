@@ -6,6 +6,10 @@ import requests
 import selenium.webdriver.common.by
 from bs4.element import Tag, NavigableString
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.utils import ChromeType
 
 from src.telegram_bot import tgbot_sent_channel
 
@@ -143,18 +147,31 @@ def main():
     CHROME_DRIVER_PATH = os.getenv("CHROME_DRIVER_PATH")
 
     soup = bs4.BeautifulSoup(home_html, 'html.parser')
-    famous_sentence = soup.find('div', class_="jucount")
+    famous_sentence = soup.find('div', class_="jucount").text.strip()
     poem_title_div = soup.find('div', class_="sourceimg")
     poem_html_link = poem_title_div.find('a').get('href')
 
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--headless')
-    chrome_options.add_argument('--disable-gpu')
-    chrome_options.add_argument('--no-sandbox')  # 这个配置很重要
+    while poem_html_link.find('shiwenv') == -1:
+        famous_sentence = ""
+        poem_title_div = poem_title_div.find_next('a')
+        poem_html_link = poem_title_div.get('href')
 
-    client = webdriver.Chrome(
-        options=chrome_options, executable_path=CHROME_DRIVER_PATH
-    )
+    # A solution from https://github.com/jsoma/selenium-github-actions
+    chrome_service = Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
+    chrome_options = Options()
+    options = [
+        "--headless",
+        "--disable-gpu",
+        "--window-size=1920,1200",
+        "--ignore-certificate-errors",
+        "--disable-extensions",
+        "--no-sandbox",
+        "--disable-dev-shm-usage"
+    ]
+    for option in options:
+        chrome_options.add_argument(option)
+    client = webdriver.Chrome(service=chrome_service, options=chrome_options)
+
     client.get(poem_html_link)
     btn = client.find_elements(selenium.webdriver.common.by.By.LINK_TEXT, "展开阅读全文 ∨")
     for x in btn:
@@ -167,7 +184,7 @@ def main():
     # f = open("../sample/poem_html.html", "r")
     # poem_html = f.read()
 
-    res_dict, res_str = parse_poem_html(poem_html, famous_sentence.text.strip())
+    res_dict, res_str = parse_poem_html(poem_html, famous_sentence)
     f = open(f"../poem/{res_dict['title']}.json", "w")
     f.write(res_str)
     f.close()
