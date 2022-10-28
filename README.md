@@ -2,22 +2,99 @@
 
 ## 简介
 Rachel want a Chinese poem everyday.
-这是一个古诗项目，计划使用爬虫获取我的每日古诗。数据源是古诗词网，如有侵权，请联系 me@inzamz.top 删除。项目计划暂时部署在服务器上，不对外开放。后续可能完善接口后开放。
-你可以直接读取仓库的 poem 目录下的 json 文件获取诗文，后续可能探索使用 Github Action 的可能性。
+这是一个古诗项目，计划使用爬虫获取我的每日古诗。数据源是古诗词网，如有侵权，请联系 [me@inzamz.top](mailto:me@inzamz.top)
+删除。项目计划暂时部署在服务器上，不对外开放。后续可能完善接口后开放。
+你可以直接读取仓库的 poem 目录下的 json 文件获取诗文，~~后续可能探索使用 Github Action 的可能性~~。
 
 ## 功能
+
 获取古诗词网首页的名句对应的原文，网站不定时更新，每天会更新几次。~~由于 Rachel 每天只要一首诗，所以不需要太多~~
 。使用爬虫获取原文，作者，译文，注释，赏析和创作背景。最终以 json 形式写入文件中。可以调用相关程序发送至 Telegram Channel 。
 
 ## TODO
+
 - [ ] 语音链接的获取
 - [ ] 作者图片的获取
 - [ ] 配图图片的获取
 - [ ] 随机获取古诗
 - [ ] 数据库的持久化储存
 - [x] Telegram Bot支持
+- [ ] 判断古诗重复
+- [ ] 增加搜索条件
+
+## How to use
+
+代码参考 [jsoma/selenium-github-actions](https://github.com/jsoma/selenium-github-actions)，使用了 `webdriver_manager`
+库，实现了 Github Action 中的 Driver 自动识别。非常感谢 [@jsoma](https://github.com/jsoma)。
+
+### Gtihub Action方式
+
+使用 Github Action 每日定时运行或者使用 workflow_dispatch 用 HTTP 请求触发。（可以搭配IOS Shutcut实现自动化）。
+
+#### 配置环境变量
+
+**请不要将任何密码口令或者账号信息硬编码在项目中!!!**
+
+fork此项目 , 随后点击 `Settings->Secrets->Actions->New repository secret` , 添加如下几个变量 :
+
+![secrets](doc/secrets.png)
+
+- `G_T` : `Github Token` , 需要自己申请 , 主要用于提交生成的 `JSON` 到仓库储存 , 后续可能会移植到数据库
+- `TGBOT_TOKEN` : TELEGRAM BOT 的鉴权口令
+- `TG_CHANNEL` : 需要发送古诗的频道 ID
+- `TG_GROUP` : 频道绑定的群组,此处实现的功能是为了减少平道中古诗信息的显示量 , 所有信息可能需要几个屏幕才能显示完 ,
+  于是频道信息只显示原文和译文 , 其他以关联群组的方式回复 , 频道中则在评论中显示额外信息 , 效果如下 :
+
+![channel-message](./doc/channel-message.png)
+
+#### 定时运行
+
+定时运行需要修改 `.github/workflows/post_everyday_poem.yml` ,
+请参考[相关语法](https://docs.github.com/cn/actions/using-workflows/workflow-syntax-for-github-actions#onschedule) :
+
+```yaml
+on:
+  workflow_dispatch: # 开启dispatch,需要主动触发
+  schedule:
+    - cron: "0 0 * * *" # 定时信息
+```
+
+#### iOS 快捷指令触发
+
+使用 `dispatch` 触发可以参考 [@yihong0618](https://github.com/yihong0618)
+大哥的博客 [巧妙利用 iOS 的快捷指令配合 GitHub Actions 实现自动化](https://github.com/yihong0618/gitblog/issues/198) .
+
+具体的教程我可能写的没有博客详尽 , 可能在有空的时候补齐 .
+
+### 本地运行
+
+如果你使用 `Chrome 浏览器` , 更新到最新版本 , 理论上 `webdriver` 是可以自动识别正确版本下载的 .
+
+~~事实上昨天晚上的我的 `Version 103` 的 `Chrome` 出现了问题 , 于是更新到最新的 `Version 107` .~~
+如果你是用的是 `Chromium` , 那么最好运行一下 `apt` 或者其他命令更新一下你的浏览器 .
+
+将代码 `clone` 后在项目根目录下运行 :
+
+```bash
+# 可选 , 更新 pip
+python3 -m pip install --upgrade pip
+
+# 安装依赖
+pip install -r requirements.txt
+
+# 添加运行需要的环境变量 , 请务必替换成自己的值
+export TG_CHANNEL=${{ TG_CHANNEL }}
+export TG_GROUP=${{ TG_GROUP }}
+export TGBOT_TOKEN=${{ TGBOT_TOKEN }}
+
+# 运行
+python3 src/main.py
+```
+
+> 由于使用了 `Telegram` , 请确保您的网络畅通以及能够连接到 `Telegram` , 尤其是中国大陆
 
 ## JSON格式
+
 参考示例：
 
 ```json
