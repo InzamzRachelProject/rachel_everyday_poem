@@ -32,6 +32,12 @@ def tgbot_sent_channel(poem_dict: dict, poem_str: str):
     url = f"https://api.telegram.org/bot{TGBOT_TOKEN}/getUpdates"
     responce = requests.request("Get", url)
     latest_update_id = 0
+    if not responce.json()['ok']:
+        logging.log(
+            logging.ERROR,
+            f"{responce.json()['error_code']}: {responce.json()['description']}",
+        )
+        return
     for update in responce.json()['result']:
         latest_update_id = max(latest_update_id, update['update_id'])
 
@@ -62,6 +68,12 @@ def tgbot_sent_channel(poem_dict: dict, poem_str: str):
     time.sleep(5)
     url = f"https://api.telegram.org/bot{TGBOT_TOKEN}/getUpdates?offset={latest_update_id}"
     responce = requests.request("Get", url)
+    if not responce.json()['ok']:
+        logging.log(
+            logging.ERROR,
+            f"{responce.json()['error_code']}: {responce.json()['description']}",
+        )
+        return
     # print(responce.json())
     for update in responce.json()['result']:
         if (
