@@ -49,5 +49,5 @@ jobs:
         with:
           github_token: ${{ secrets.G_T }}
           branch: main
-          message: ':speech_balloon: chore: autopublish ${timestamp}'
+          message: ':speech_balloon: chore: autopublish ${{ timestamp }}'
           force: true
