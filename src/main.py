@@ -89,7 +89,8 @@ def parse_poem_html(poem_html: str, famous_sentence: str) -> (dict, str):
                     if isinstance(subcontext, Tag) and subcontext.name == 'span':
                         poem_reference_string += subcontext.text
                 poem_reference_string += '\n'
-
+    while len(poem_translate_list) <= 2:
+        poem_translate_list.append("")
     # 赏析部分的解析，赏析可能有多段，按照shangxi<id>的id字段区分
     # 因此使用的是列表，例如：春江花月夜存在三个赏析段
     poem_appreciation_list = []
@@ -105,14 +106,17 @@ def parse_poem_html(poem_html: str, famous_sentence: str) -> (dict, str):
     # 作品背景的提取
     poem_background_info = '创作背景\n'
     poem_background_info_div = main3_div.find('h2')
-    while poem_background_info_div.text.find('创作背景') == -1:
+    while poem_background_info_div != None and poem_background_info_div.text.find('创作背景') == -1:
         poem_background_info_div = poem_background_info_div.find_next('h2')
-    poem_background_info_div = poem_background_info_div.find_parent()
-    poem_background_info_div = poem_background_info_div.find_parent()
-    # print(poem_background_info_div)
-    for each in poem_background_info_div.contents:
-        if isinstance(each, Tag) and each.name == 'p':
-            poem_background_info += ''.join(each.text.split()).strip() + '\n'
+    if poem_background_info_div != None:
+        poem_background_info_div = poem_background_info_div.find_parent()
+        poem_background_info_div = poem_background_info_div.find_parent()
+        # print(poem_background_info_div)
+        for each in poem_background_info_div.contents:
+            if isinstance(each, Tag) and each.name == 'p':
+                poem_background_info += ''.join(each.text.split()).strip() + '\n'
+    else:
+        poem_background_info = '创作背景\n暂无'
 
     # 作者生平简介的提取
     poem_author_info = '作者简介\n'
